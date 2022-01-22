@@ -1,17 +1,16 @@
 package models
 
-import (
-  "net/http"
-  "fmt"
-  "database/sql"
-)
-
 type User struct {
   Id int32 `json:"_id"`
   Username string `json:"username"`
   Password string `json:"password"`
   Email string `json:"email"`
-  Todos []Todo `json:"todos"`
+}
+
+type QueryableUser struct {
+  Id int32 `json:"_id"`
+  Username string `json:"username"`
+  Email string `json:"email"`
 }
 
 type CreateUser struct {
@@ -21,22 +20,13 @@ type CreateUser struct {
 }
 
 type UserJsonResponse struct {
-  Type    string `json:"type"`
-  Data    []User `json:"data"`
+  Success    bool `json:"success"`
+  Data    []QueryableUser `json:"data"`
   Message string `json:"message"`
 }
 
-func NewUser(user CreateUser) User {
-  return User {
-    username: user.username,
-    password: user.password,
-    email: user.email,
-    todos: []Todo{},
-  }
-}
-
 func (user *User) VerifyPassword(password string) bool {
-  if user.password == password {
+  if user.Password == password {
     return true
   }
   return false
