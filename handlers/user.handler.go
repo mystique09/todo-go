@@ -4,12 +4,13 @@ import (
   "database/sql"
   "net/http"
   "fmt"
+  //"server-go/utils"
 )
 
 func AllUser(db *sql.DB) http.HandlerFunc {
   return func(w http.ResponseWriter, r *http.Request) {
     if r.Method != "GET" {
-      http.NotFound(w,r)
+      http.NotFound(w, r)
       return
     }
     
@@ -21,7 +22,7 @@ func AllUser(db *sql.DB) http.HandlerFunc {
 func CreateNewUser(db *sql.DB) http.HandlerFunc {
   return func(w http.ResponseWriter, r *http.Request) {
     if r.Method != "POST" {
-      http.NotFound(w,r)
+      http.NotFound(w, r)
       return
     }
     

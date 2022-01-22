@@ -7,17 +7,23 @@ import (
 )
 
 type User struct {
-  id int32
-  username string
-  password string
-  email string
-  todos []Todo
+  Id int32 `json:"_id"`
+  Username string `json:"username"`
+  Password string `json:"password"`
+  Email string `json:"email"`
+  Todos []Todo `json:"todos"`
 }
 
 type CreateUser struct {
-  username string
-  password string
-  email string
+  Username string
+  Password string
+  Email string
+}
+
+type UserJsonResponse struct {
+  Type    string `json:"type"`
+  Data    []User `json:"data"`
+  Message string `json:"message"`
 }
 
 func NewUser(user CreateUser) User {
