@@ -1,4 +1,4 @@
-package todo
+package models
 
 type Todo struct {
   id int32

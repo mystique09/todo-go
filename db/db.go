@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	_ "github.com/lib/pq"
-	//"log"
+	"log"
 )
 
 const (
@@ -21,13 +21,13 @@ func InitDb() *sql.DB {
 	conn, err := sql.Open("postgres", psqlConfig)
 
 	if err != nil {
-		fmt.Println(err)
+		log.Fatal(err)
 	}
 	err = conn.Ping()
 
 	if err != nil {
-		fmt.Println(err)
+		log.Fatal(err)
 	}
-	fmt.Println("Database connected!")
+	log.Println("🎆 Database connected!")
 	return conn
 }
