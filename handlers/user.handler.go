@@ -65,7 +65,7 @@ func CreateNewUser(db *sql.DB) http.HandlerFunc {
       
       response = utils.Response {
         Success: true,
-        Message: "New user added.",
+        Message: "New user added with id of ",
       }
       json.NewEncoder(w).Encode(response)
       return
