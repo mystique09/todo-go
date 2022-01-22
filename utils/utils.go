@@ -9,3 +9,8 @@ func CheckError(err error) {
 		log.Fatal(err)
 	}
 }
+
+type Response struct {
+  Success bool `json:"success"`
+  Message string `json:"message"`
+}
