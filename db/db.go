@@ -12,7 +12,7 @@ const (
 	port     = 5432
 	user     = "mystique09"
 	password = "mystique09"
-	dbname   = "codegram"
+	dbname   = "todoapp"
 )
 
 func InitDb() *sql.DB {
