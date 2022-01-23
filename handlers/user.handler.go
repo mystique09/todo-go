@@ -1,57 +1,49 @@
 package handlers
 
 import (
-  "database/sql"
+  "gorm.io/gorm"
   "net/http"
   "server-go/utils"
+  "fmt"
+  //"time"
   "server-go/models"
   "encoding/json"
+  "github.com/google/uuid"
 )
 
-func AllUser(db *sql.DB) http.HandlerFunc {
+func AllUser(db *gorm.DB) http.HandlerFunc {
   return func(w http.ResponseWriter, r *http.Request) {
     if r.Method != "GET" {
       http.NotFound(w, r)
       return
     }
     
-    rows, err := db.Query(`SELECT id, username, email FROM "User"`)
-    utils.CheckError(err)
+    var users []models.User
+    db.Find(&users)
     
-    var users []models.QueryableUser = []models.QueryableUser{}
-    
-    for rows.Next() {
-      var id int32
-      var username string
-      var email string
-      
-      err = rows.Scan(&id, &username, &email)
-      utils.CheckError(err)
-      users = append(users, models.QueryableUser {Id: id, Username: username, Email: email})
-    }
-    var response = models.UserJsonResponse {
+    var response models.UserJsonResponse = models.UserJsonResponse {
       Success: true,
       Data: users,
       Message: "All users.",
     }
-    w.WriteHeader(http.StatusOK)
     json.NewEncoder(w).Encode(response)
   }
 }
 
 /* Create user route */
-func CreateNewUser(db *sql.DB) http.HandlerFunc {
+func CreateNewUser(db *gorm.DB) http.HandlerFunc {
   return func(w http.ResponseWriter, r *http.Request) {
     if r.Method != "POST" {
       http.NotFound(w, r)
       return
     }
+    
     var username string = r.FormValue("username")
     var password string = r.FormValue("password")
     var email string = r.FormValue("email")
     var response utils.Response
     
-    if username == "" || password == "" || email == "" {
+    if username == "" || email == "" || password == "" {
       w.WriteHeader(http.StatusBadRequest)
       response = utils.Response {
         Success: false,
@@ -59,19 +51,31 @@ func CreateNewUser(db *sql.DB) http.HandlerFunc {
       }
       json.NewEncoder(w).Encode(response)
       return
-    } else {
-      var lastInsertedId int32 
-      err := db.QueryRow(`INSERT INTO "User"(username, password, email) VALUES($1, $2, $3) returning id;`, username, password, email).Scan(&lastInsertedId)
-      
-      utils.CheckError(err)
-      
-      w.WriteHeader(http.StatusOK)
+    }
+    
+    var new_uuid uuid.UUID = uuid.New()
+    
+    var new_user models.User = models.User {
+      ID: new_uuid,
+      Username: username,
+      Password: password,
+      Email: email,
+    }
+    
+    if err := db.Create(&new_user).Error; err != nil {
+      w.WriteHeader(http.StatusBadRequest)
       response = utils.Response {
-        Success: true,
-        Message: "New user added with id of ",
+        Success: false,
+        Message: fmt.Sprintf("%v", err),
       }
       json.NewEncoder(w).Encode(response)
       return
     }
+    
+    response = utils.Response {
+      Success: true,
+      Message: "New user added!",
+    }
+    json.NewEncoder(w).Encode(response)
+    }
   }
-}
