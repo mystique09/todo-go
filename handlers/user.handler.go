@@ -27,13 +27,14 @@ func AllUser(db *sql.DB) http.HandlerFunc {
       
       err = rows.Scan(&id, &username, &email)
       utils.CheckError(err)
-      users = append(users, models.QueryableUser { Username: username, Email: email})
+      users = append(users, models.QueryableUser {Id: id, Username: username, Email: email})
     }
     var response = models.UserJsonResponse {
       Success: true,
       Data: users,
       Message: "All users.",
     }
+    w.WriteHeader(http.StatusOK)
     json.NewEncoder(w).Encode(response)
   }
 }
@@ -51,6 +52,7 @@ func CreateNewUser(db *sql.DB) http.HandlerFunc {
     var response utils.Response
     
     if username == "" || password == "" || email == "" {
+      w.WriteHeader(http.StatusBadRequest)
       response = utils.Response {
         Success: false,
         Message: "Missing required fields!",
@@ -63,6 +65,7 @@ func CreateNewUser(db *sql.DB) http.HandlerFunc {
       
       utils.CheckError(err)
       
+      w.WriteHeader(http.StatusOK)
       response = utils.Response {
         Success: true,
         Message: "New user added with id of ",
