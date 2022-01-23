@@ -1,11 +1,12 @@
 package main
 
 import (
-	"database/sql"
+	"gorm.io/gorm"
 	"log"
 	"net/http"
 	database "server-go/db"
 	"server-go/handlers"
+	"server-go/models"
 )
 
 type App struct {
@@ -13,7 +14,9 @@ type App struct {
 }
 
 func (app *App) Init() {
-	var db *sql.DB = database.InitDb()
+	var db *gorm.DB = database.InitDb()
+	db.AutoMigrate(&models.User{})
+	db.AutoMigrate(&models.Todo{})
 
 	app.Mux = http.NewServeMux()
 	app.Mux.HandleFunc("/", handlers.IndexRoute)
@@ -22,6 +25,6 @@ func (app *App) Init() {
 }
 
 func (app *App) Run() {
-	log.Println("🎆 Server started.")
+	log.Println("Server started.")
 	log.Fatal(http.ListenAndServe(":3000", app.Mux))
 }
