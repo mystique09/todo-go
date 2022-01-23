@@ -1,33 +1,32 @@
 package db
 
 import (
-	"database/sql"
+	"gorm.io/gorm"
+	"gorm.io/driver/postgres"
 	"fmt"
-	_ "github.com/lib/pq"
 	"log"
+	"os"
+	"github.com/joho/godotenv"
 )
 
-const (
-	host     = "localhost"
-	port     = 5432
-	user     = "mystique09"
-	password = "mystique09"
-	dbname   = "todoapp"
-)
-
-func InitDb() *sql.DB {
-	psqlConfig := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", host, port, user, password, dbname)
-
-	conn, err := sql.Open("postgres", psqlConfig)
+func InitDb() *gorm.DB {
+  err := godotenv.Load()
+  if err != nil {
+    log.Fatal("Error loading .env file.")
+  }
+  
+  DB_NAME := os.Getenv("DB_NAME")
+  DB_USERNAME := os.Getenv("DB_USERNAME")
+  DB_PASSWORD := os.Getenv("DB_PASSWORD")
+  DB_HOST := os.Getenv("DB_HOST")
+  
+  var DB_CONFIG string = fmt.Sprintf("postgres://%s:%s@%s/%s", DB_USERNAME, DB_PASSWORD, DB_HOST, DB_NAME)
+  
+	conn, err := gorm.Open(postgres.Open(DB_CONFIG), &gorm.Config{})
 
 	if err != nil {
 		log.Fatal(err)
 	}
-	err = conn.Ping()
-
-	if err != nil {
-		log.Fatal(err)
-	}
-	log.Println("🎆 Database connected!")
+	fmt.Println("🎆 Database connected!")
 	return conn
 }
