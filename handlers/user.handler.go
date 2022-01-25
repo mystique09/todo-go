@@ -4,7 +4,7 @@ import (
   "gorm.io/gorm"
   "net/http"
   "server-go/utils"
-  //"fmt"
+  "fmt"
   //"time"
   "server-go/models"
   "encoding/json"
@@ -84,14 +84,14 @@ func GetUser(db *gorm.DB) http.HandlerFunc {
       http.NotFound(w, r)
       return
     }
-    var user_uuid = r.URL.Query()["uuid"]
+    var user_uuid = r.URL.Query()["uuid"][0]
     var user models.QueryableUser
     var response models.UserJsonResponse = models.UserJsonResponse {
       Success: false,
       Data: []models.QueryableUser{},
     }
     
-    if user_uuid[0] == "" {
+    if user_uuid == "" {
       response.Message = "Missing uuid query parameter."
       w.WriteHeader(http.StatusBadRequest)
       w.Write(utils.ParseJson(response))
@@ -101,7 +101,7 @@ func GetUser(db *gorm.DB) http.HandlerFunc {
     db.Model(&models.User{}).Where("id = ?", user_uuid).Find(&user)
     
     if user.Username == "" {
-      response.Message = "No user found with the specified id."
+      response.Message = fmt.Sprintf("No user found with id %s", user_uuid)
       w.WriteHeader(http.StatusBadRequest)
       w.Write(utils.ParseJson(response))
       return
@@ -131,5 +131,35 @@ func DeleteUser(db *gorm.DB) http.HandlerFunc {
       return
     }
     
+    var user_uuid = r.URL.Query()["uuid"][0]
+    var hasUser models.QueryableUser
+    var response utils.Response = utils.Response {
+      Success: false,
+      Message: "",
+    }
+    
+    if user_uuid == "" {
+      response.Message = "Missing uuid query parameter."
+      w.WriteHeader(http.StatusBadRequest)
+      w.Write(utils.ParseJson(response))
+      return
+    }
+    db.Model(&models.User{}).Where("id = ?", user_uuid).Find(&hasUser)
+    
+    if hasUser.Username == "" {
+      response.Message = fmt.Sprintf("No user found with id %s", user_uuid)
+      w.WriteHeader(http.StatusBadRequest)
+      w.Write(utils.ParseJson(response))
+      return
+    }
+    
+    db.Where("id = ?", user_uuid).Delete(&models.User{})
+    response = utils.Response {
+      Success: true,
+      Message: "User deleted.",
+    }
+    
+    w.WriteHeader(http.StatusOK)
+    w.Write(utils.ParseJson(response))
   }
 }
