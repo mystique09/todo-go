@@ -1,38 +1,37 @@
 package models
 
 import (
-  "gorm.io/gorm"
+  //"gorm.io/gorm"
   "time"
   "github.com/google/uuid"
 )
 
 type User struct {
-  gorm.Model
-  ID uuid.UUID `gorm:"primaryKey"json:"_id"`
+  Id uuid.UUID `gorm:"primarykey"json:"_id"`
   Username string `gorm:"unique;not null"json:"username"`
   Password string `json:"password"`
-  Email string `gorm:"unique;not null"json:"email"`
-  /*CreatedAt time.Time `json:"created_at"`
-  UpdatedAt time.Time `json:"created_at"`
-  DeletedAt time.Time `json:"deleted_at"`*/
+  Email string `gorm:"not null"json:"email"`
+  CreatedAt time.Time `gorm:"autoCreateTime"json:"created_at"`
+  UpdatedAt time.Time `gorm:"autoUpdateTime"json:"updated_at"`
+  DeledAt time.Time `gorm:"index"json:"deleted_at"`
 }
 
 type QueryableUser struct {
-  Id int32 `json:"_id"`
+  Id uuid.UUID `json:"_id"`
   Username string `json:"username"`
   Email string `json:"email"`
-  CreatedAt time.Time `json:"created_at"`
+  CreatedAt time.Time `json:"updated_at"`
   UpdatedAt time.Time `json:"created_at"`
 }
 
 type CreateUser struct {
-  Username string
-  Password string
-  Email string
+  username string
+  password string
+  email string
 }
 
 type UserJsonResponse struct {
   Success    bool `json:"success"`
-  Data    []User `json:"data"`
+  Data    []QueryableUser `json:"data"`
   Message string `json:"message"`
 }
