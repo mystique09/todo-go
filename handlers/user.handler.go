@@ -4,7 +4,7 @@ import (
   "gorm.io/gorm"
   "net/http"
   "server-go/utils"
-  "fmt"
+  //"fmt"
   //"time"
   "server-go/models"
   "encoding/json"
@@ -18,8 +18,8 @@ func AllUser(db *gorm.DB) http.HandlerFunc {
       return
     }
     
-    var users []models.User
-    db.Find(&users)
+    var users []models.QueryableUser
+    db.Model(&models.User{}).Select("id", "username", "email", "created_at", "updated_at").Find(&users)
     
     var response models.UserJsonResponse = models.UserJsonResponse {
       Success: true,
@@ -37,45 +37,43 @@ func CreateNewUser(db *gorm.DB) http.HandlerFunc {
       http.NotFound(w, r)
       return
     }
+
+    var new_user models.User 
+    utils.ParseBody(r, &new_user)
+    new_user.Id = uuid.New()
     
-    var username string = r.FormValue("username")
-    var password string = r.FormValue("password")
-    var email string = r.FormValue("email")
-    var response utils.Response
-    
-    if username == "" || email == "" || password == "" {
-      w.WriteHeader(http.StatusBadRequest)
-      response = utils.Response {
+    response := utils.Response {
         Success: false,
-        Message: "Missing required fields!",
+        Message: "",
       }
-      json.NewEncoder(w).Encode(response)
-      return
+    
+    if new_user.Username == "" || new_user.Email == "" || new_user.Password == "" {
+        response.Message = "Missing required fields."
+        w.WriteHeader(http.StatusBadRequest)
+        w.Write(utils.ParseJson(response))
+        return
     }
     
-    var new_uuid uuid.UUID = uuid.New()
+    var hasUser models.QueryableUser
+    db.Model(&models.User{}).Where("username = ?", new_user.Username).Select("id", "username", "email", "created_at", "updated_at").Find(&hasUser)
     
-    var new_user models.User = models.User {
-      ID: new_uuid,
-      Username: username,
-      Password: password,
-      Email: email,
+    if hasUser.Username != "" {
+      response.Message = "User already exist!"
+      w.WriteHeader(http.StatusBadRequest)
+      w.Write(utils.ParseJson(response))
+      return
     }
     
     if err := db.Create(&new_user).Error; err != nil {
+      response.Message = "Error while creating user.";
       w.WriteHeader(http.StatusBadRequest)
-      response = utils.Response {
-        Success: false,
-        Message: fmt.Sprintf("%v", err),
-      }
-      json.NewEncoder(w).Encode(response)
+      w.Write(utils.ParseJson(response))
       return
     }
     
-    response = utils.Response {
-      Success: true,
-      Message: "New user added!",
-    }
-    json.NewEncoder(w).Encode(response)
+    response.Message = "User created successfully."
+    response.Success = true
+    w.WriteHeader(http.StatusOK)
+    w.Write(utils.ParseJson(response))
     }
   }
