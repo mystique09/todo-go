@@ -77,3 +77,59 @@ func CreateNewUser(db *gorm.DB) http.HandlerFunc {
     w.Write(utils.ParseJson(response))
     }
   }
+  
+func GetUser(db *gorm.DB) http.HandlerFunc {
+  return func(w http.ResponseWriter, r *http.Request) {
+    if r.Method != "GET" {
+      http.NotFound(w, r)
+      return
+    }
+    var user_uuid = r.URL.Query()["uuid"]
+    var user models.QueryableUser
+    var response models.UserJsonResponse = models.UserJsonResponse {
+      Success: false,
+      Data: []models.QueryableUser{},
+    }
+    
+    if user_uuid[0] == "" {
+      response.Message = "Missing uuid query parameter."
+      w.WriteHeader(http.StatusBadRequest)
+      w.Write(utils.ParseJson(response))
+      return
+    }
+    
+    db.Model(&models.User{}).Where("id = ?", user_uuid).Find(&user)
+    
+    if user.Username == "" {
+      response.Message = "No user found with the specified id."
+      w.WriteHeader(http.StatusBadRequest)
+      w.Write(utils.ParseJson(response))
+      return
+    }
+    response.Success = true
+    response.Message = "User found."
+    response.Data = append(response.Data, user)
+    w.WriteHeader(http.StatusOK)
+    w.Write(utils.ParseJson(response))
+  }
+}
+
+func UpdateUser(db *gorm.DB) http.HandlerFunc {
+  return func(w http.ResponseWriter, r *http.Request) {
+    if r.Method != "PUT" {
+      http.NotFound(w, r)
+      return
+    }
+    
+  }
+}
+
+func DeleteUser(db *gorm.DB) http.HandlerFunc {
+  return func(w http.ResponseWriter, r *http.Request) {
+    if r.Method != "DELETE" {
+      http.NotFound(w, r)
+      return
+    }
+    
+  }
+}
