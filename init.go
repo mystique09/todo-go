@@ -23,8 +23,8 @@ func (app *App) Init() {
 	app.Mux.HandleFunc("/users", handlers.AllUser(db))
 	app.Mux.HandleFunc("/users/create", handlers.CreateNewUser(db))
 	app.Mux.HandleFunc("/users/get", handlers.GetUser(db))
+	app.Mux.HandleFunc("/users/delete", handlers.DeleteUser(db))
 	app.Mux.HandleFunc("/users/update", handlers.UpdateUser(db))
-	app.Mux.HandleFunc("/users/delete", handlers.UpdateUser(db))
 }
 
 func (app *App) Run() {
