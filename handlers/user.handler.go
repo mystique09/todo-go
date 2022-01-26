@@ -121,6 +121,62 @@ func UpdateUser(db *gorm.DB) http.HandlerFunc {
       return
     }
     
+    var user_uuid = r.URL.Query()["uuid"][0]
+    var prop = r.URL.Query()["prop"][0]
+    var hasUser models.QueryableUser
+    var user models.User
+    response := utils.Response {
+      Success: true,
+      Message: "",
+    }
+    
+    utils.ParseBody(r, &user)
+    
+    if user_uuid == "" || prop == "" {
+      response = utils.Response {
+        Success: false,
+        Message: "Missing some query parameter.",
+      }
+      w.WriteHeader(http.StatusBadRequest)
+      w.Write(utils.ParseJson(response))
+      return
+    }
+    
+    db.Model(&models.User{}).Where("id = ?", user_uuid).Find(&hasUser)
+    
+    if hasUser.Username == "" {
+      response.Success = false
+      response.Message = fmt.Sprintf("No user found with id %s", user_uuid)
+      w.WriteHeader(http.StatusBadRequest)
+      w.Write(utils.ParseJson(response))
+      return
+    }
+    
+    switch prop {
+      case "password":
+        if user.Password != "" {
+          db.Model(&models.User{}).Where("id = ?", user_uuid).Update("password", user.Password)
+          response.Message = "Password changed."
+          break
+        }
+      case "username":
+        if user.Username != "" {
+          db.Model(&models.User{}).Where("id = ?", user_uuid).Update("username", user.Username)
+          response.Message = "Username changed."
+          break
+        }
+     case "email":
+        if user.Email != "" {
+          db.Model(&models.User{}).Where("id = ?", user_uuid).Update("email", user.Email)
+          response.Message = "Email changed."
+          break
+        }
+     default:
+        response.Message = "Unknown prop."
+    }
+    response.Message = "Update success."
+    w.WriteHeader(http.StatusOK)
+    w.Write(utils.ParseJson(response))
   }
 }
 
