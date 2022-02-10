@@ -5,6 +5,7 @@ import (
 	"server-go/models"
 	"server-go/utils"
 
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -17,7 +18,7 @@ func AllTodo(db *gorm.DB) http.HandlerFunc {
 
 		var todos []models.Todo
 
-		db.Model(&models.User{}).Find(&todos)
+		db.Model(&models.Todo{}).Find(&todos)
 
 		var response models.TodosResponseJson = models.TodosResponseJson{
 			Success: true,
@@ -65,7 +66,42 @@ func GetTodo(db *gorm.DB) http.HandlerFunc {
 
 func CreateTodo(db *gorm.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != "POST" {
+			http.NotFound(w, r)
+			return
+		}
+		var n_todo models.Todo
+		utils.ParseBody(r, &n_todo)
+		n_todo.Id = uuid.New()
+		n_todo.Done = false
 
+		var response utils.Response
+
+		if n_todo.Author == uuid.Nil {
+			response = utils.Response{
+				Message: n_todo.Author.String(),
+				Success: false,
+			}
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write(utils.ParseJson(response))
+			return
+		}
+
+		if err := db.Create(&n_todo).Error; err != nil {
+			response := utils.Response{
+				Success: false,
+				Message: "Error while creating new todo.",
+			}
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write(utils.ParseJson(response))
+			return
+		}
+		response = utils.Response{
+			Success: true,
+			Message: "New todo added.",
+		}
+		w.WriteHeader(http.StatusOK)
+		w.Write(utils.ParseJson(response))
 	}
 }
 

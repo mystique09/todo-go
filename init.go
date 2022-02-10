@@ -30,11 +30,11 @@ func (app *App) Init() {
 	app.Mux.HandleFunc("/users/update", handlers.UpdateUser(db))
 
 	// TODO HANDLERS
-	app.Mux.HandleFunc("/users", handlers.AllTodo(db))
-	app.Mux.HandleFunc("/users/create", handlers.CreateTodo(db))
-	app.Mux.HandleFunc("/users/get", handlers.GetTodo(db))
-	app.Mux.HandleFunc("/users/delete", handlers.DeleteTodo(db))
-	app.Mux.HandleFunc("/users/update", handlers.UpdateTodo(db))
+	app.Mux.HandleFunc("/todos", handlers.AllTodo(db))
+	app.Mux.HandleFunc("/todos/create", handlers.CreateTodo(db))
+	app.Mux.HandleFunc("/todos/get", handlers.GetTodo(db))
+	app.Mux.HandleFunc("/todos/delete", handlers.DeleteTodo(db))
+	app.Mux.HandleFunc("/todos/update", handlers.UpdateTodo(db))
 }
 
 func (app *App) Run() {

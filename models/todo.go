@@ -2,11 +2,10 @@ package models
 
 import (
 	"github.com/google/uuid"
-	"gorm.io/gorm"
 )
 
 type Todo struct {
-	gorm.Model
+	Id          uuid.UUID `json:"id"`
 	Author      uuid.UUID `json:"todo_author"`
 	Title       string    `json:"todo_title"`
 	Description string    `json:"todo_description"`
@@ -14,9 +13,10 @@ type Todo struct {
 }
 
 type CreateTodo struct {
-	Title       string
-	Description string
-	Done        bool
+	Id          uuid.UUID `json:"id"`
+	Author      uuid.UUID `json:"todo_author"`
+	Title       string    `json:"todo_title"`
+	Description string    `json:"todo_description"`
 }
 
 type TodosResponseJson struct {
