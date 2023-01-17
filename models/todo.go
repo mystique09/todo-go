@@ -1,22 +1,32 @@
 package models
 
 import (
-  "time"
-  "github.com/google/uuid"
+	"github.com/google/uuid"
 )
 
 type Todo struct {
-  id uuid.UUID `gorm:"primaryKey"json:"_id"`
-  author uuid.UUID `json:"todo_author"`
-  title string `json:"todo_title"`
-  description string `json:"todo_description"`
-  done bool `json:"done"`
-  CreatedAt time.Time `json:"created_at"`
-  UpdatedAt time.Time `json:"created_at"`
+	Id          uuid.UUID `json:"id"`
+	Author      uuid.UUID `json:"todo_author"`
+	Title       string    `json:"todo_title"`
+	Description string    `json:"todo_description"`
+	Done        bool      `json:"done"`
 }
 
 type CreateTodo struct {
-  title string
-  description string
-  done bool
+	Id          uuid.UUID `json:"id"`
+	Author      uuid.UUID `json:"todo_author"`
+	Title       string    `json:"todo_title"`
+	Description string    `json:"todo_description"`
+}
+
+type TodosResponseJson struct {
+	Success bool   `json:"success"`
+	Data    []Todo `json:"todos"`
+	Message string `json:"message"`
+}
+
+type TodoResponseJson struct {
+	Success bool   `json:"success"`
+	Data    Todo   `json:"todos"`
+	Message string `json:"message"`
 }
